@@ -56,7 +56,7 @@ else
 fi
 
 # Install Neovim
-print_color "orange" "---------------- Installing Neovim ------------------"
+print_color "orange" "---------------- Installing Neovim & AstroNvim ------------------"
 output=$(git clone https://github.com/neovim/neovim.git "$HOME/neovim" 2>&1)
 is_cloned "$output"
 
@@ -65,10 +65,11 @@ dir_path="$HOME/neovim"
 dir_exist "$dir_path"
 
 # Execute commands and check for failure
-make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX=$HOME/neovim && \
-make -j4 && \
-make install || \
+make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX=$HOME/neovim > /dev/null && \
+make -j4 > /dev/null && \
+make install > /dev/null || \
 { print_color "red" "One of the commands failed"; exit 3; }
+
 
 nvim --version || \
 { print_color "red" "Installation failed"; exit 4; }
@@ -83,10 +84,7 @@ fi
 # Applying the changes on your shell
 source "$SHELL_RC_FILE" || { print_color "red" "Failed to reload $SHELL_RC_FILE"; exit 6; }
 
-print_color "green" "---------------- Neovim installed ------------------"
-
 # Install AstroNvim
-print_color "orange" "---------------- Installing AstroNvim ------------------"
 output2=$(git clone --depth 1 https://github.com/AstroNvim/AstroNvim "$HOME/.config/nvim" 2>&1)
 is_cloned "$output2"
 
