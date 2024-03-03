@@ -17,15 +17,6 @@ function print_color()
 
 }
 
-function is_cloned() {
-    if [ $? -eq 0 ]; then
-        print_color "deepgreen" "Repository cloned successfully"
-    else
-        print_color "red" "Failed to clone repository: $1"
-        exit 1
-    fi
-}
-
 
 function clone_repo() {
     local repo_url=$1
@@ -67,7 +58,6 @@ else
 fi
 
 
-
 # Install Neovim
 print_color "orange" "---------------- Installing Neovim ------------------"
 update_progress 0
@@ -76,7 +66,7 @@ clone_repo "https://github.com/neovim/neovim.git" "$HOME/neovim"
 # Update progress after cloning Neovim
 update_progress 20
 
-# cd into neovim
+# cd into neovim directory
 dir_path="$HOME/neovim"
 if [ -d "$dir_path" ]; then
     cd "$dir_path" || { print_color "red" "Unable to change directory!!!"; exit 2; }
@@ -86,13 +76,12 @@ else
 fi
 update_progress 25
 
-# Execute commands and check for failure
+# Execute install commands and check for failure
 make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX=$HOME/neovim > /dev/null 2>&1 && \
 make -j4 > /dev/null 2>&1 && \
 make install > /dev/null 2>&1 || \
 { print_color "red" "One of the commands failed"; exit 3; }
 update_progress 60
-
 
 # Append the export PATH command with a newline
 echo -e "\nexport PATH=\$HOME/neovim/bin:\$PATH" >> "$SHELL_RC_FILE" || \
@@ -100,8 +89,20 @@ echo -e "\nexport PATH=\$HOME/neovim/bin:\$PATH" >> "$SHELL_RC_FILE" || \
 source "$SHELL_RC_FILE" || { print_color "red" "Failed to reload $SHELL_RC_FILE"; exit 6; }
 update_progress 65
 
-# nvim --version || \
-# { print_color "red" "Installation failed"; exit 4; }
+neovim_bin_path="$HOME/neovim/bin"
+if [[ ":$PATH:" != *":$neovim_bin_path:"* ]]; then
+    echo "export PATH=\$PATH:$neovim_bin_path" >> "$SHELL_RC_FILE" || \
+    { print_color "red" "Failed to write into $SHELL_RC_FILE"; exit 5; }
+
+    # Applying the changes on your shell
+    source "$SHELL_RC_FILE" || { print_color "red" "Failed to reload $SHELL_RC_FILE"; exit 6; }
+
+    # Update progress after setting PATH
+    update_progress 65
+fi
+
+# Check if Neovim was successfully installed
+nvim --version > /dev/null 2>&1 || { print_color "red" "Installation failed"; exit 4; }
 
 # Clone AstoNvim
 clone_repo "--depth 1 https://github.com/AstroNvim/AstroNvim" "$HOME/.config/nvim"
@@ -114,6 +115,7 @@ else
 fi
 update_progress 80
 
+# Install the AstroNvim plugins
 nvim || { print_color "red" "Something went wrong..."; exit 7;}
 update_progress 95
 
