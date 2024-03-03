@@ -84,8 +84,7 @@ echo -e "\nexport PATH=\$HOME/neovim/bin:\$PATH" >> "$SHELL_RC_FILE" || \
 { print_color "red" "Failed to write into $SHELL_RC_FILE"; exit 5; }
 
 print_color "orange" "---------------- Applying the changes on your shell ------------------"
-exec $SHELL || { print_color "red" "Failed to restart $SHELL shell"}
-
+source "$SHELL_RC_FILE" || { print_color "red" "Failed to reload $SHELL_RC_FILE"; exit 6; }
 
 print_color "green" "---------------- Neovim installed successfully ------------------"
 
@@ -108,14 +107,12 @@ else
 fi
 
 print_color "orange" "---------------- Installing AstroNvim plugins ------------------"
-# nvim || 
-nvim --headless -c "autocmd User PackerComplete quitall" -c "PackerSync" || \
-	{ print_color "red" "Something went wrong..."; exit 7;}
+nvim || { print_color "red" "Something went wrong..."; exit 7;}
 
 # Append the export PATH command with a newline
 print_color "orange" "---------------- Adding $MYVIMRC to PATH ------------------"
 echo -e "\nexport MYVIMRC=\"$HOME/.config/nvim/init.lua\"" >> "$SHELL_RC_FILE" || \
-{ print_color "red" "Failed to write into ~/.bashrc"; exit 8; }
+{ print_color "red" "Failed to write into $SHELL_RC_FILE"; exit 8; }
 
 
 print_color "green" "---------------- AstroNvim successfully installed ------------------"
