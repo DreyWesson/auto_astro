@@ -1,7 +1,5 @@
 #! /bin/bash
 
-chmod +x "$0" # Make the script itself executable
-
 function print_color()
 {
     NC='\033[0m' # No Color
@@ -37,18 +35,6 @@ function dir_exist() {
     fi
 }
 
-# Check if make is installed
-if ! command -v make &> /dev/null; then
-    print_color "orange" "Make command not found. Installing build-essential..."
-    sudo apt-get update
-    sudo apt-get install -y build-essential
-    if [ $? -ne 0 ]; then
-        print_color "red" "Failed to install build-essential. Exiting..."
-        exit 1
-    else
-        print_color "green" "build-essential installed successfully"
-    fi
-fi
 
 # Detect user's default shell and set shell configuration file
 if [[ -n "$BASH" ]]; then
@@ -94,7 +80,7 @@ nvim --version || \
 
 print_color "orange" "---------------- Adding neovim's binary directory to PATH ------------------"
 # Append the export PATH command with a newline
-echo -e "\nexport PATH=\$HOME/neovim/bin:\$PATH" >> "$SHELL_RC_FILE" \
+echo -e "\nexport PATH=\$HOME/neovim/bin:\$PATH" >> "$SHELL_RC_FILE" || \
 { print_color "red" "Failed to write into $SHELL_RC_FILE"; exit 5; }
 
 print_color "orange" "---------------- Applying the changes on your shell ------------------"
@@ -108,7 +94,7 @@ print_color "green" "---------------- Neovim installed successfully ------------
 
 
 print_color "orange" "---------------- Installing AstroNvim ------------------"
-output2=$(git clone https://github.com/neovim/neovim.git "$HOME/neovim" 2>&1)
+output2=$(git clone --depth 1 https://github.com/AstroNvim/AstroNvim "$HOME/.config/nvim" 2>&1)
 is_cloned "$output2"
 print_color "orange" "---------------- Entering into AstroNvim directory ------------------"
 dir_path="$HOME/.config/nvim"
@@ -122,8 +108,9 @@ else
 fi
 
 print_color "orange" "---------------- Installing AstroNvim plugins ------------------"
-nvim || { print_color "red" "Something went wrong..."; exit 7;}
-
+# nvim || 
+nvim --headless -c "autocmd User PackerComplete quitall" -c "PackerSync" || \
+	{ print_color "red" "Something went wrong..."; exit 7;}
 
 # Append the export PATH command with a newline
 print_color "orange" "---------------- Adding $MYVIMRC to PATH ------------------"
@@ -132,5 +119,3 @@ echo -e "\nexport MYVIMRC=\"$HOME/.config/nvim/init.lua\"" >> "$SHELL_RC_FILE" |
 
 
 print_color "green" "---------------- AstroNvim successfully installed ------------------"
-
-
