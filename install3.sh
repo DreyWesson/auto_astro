@@ -73,15 +73,17 @@ make install || \
 nvim --version || \
 { print_color "red" "Installation failed"; exit 4; }
 
-# Add neovim's binary directory to PATH
+# Add neovim's binary directory to PATH if not already in PATH
 neovim_bin_path="$HOME/neovim/bin"
-echo "export PATH=\$PATH:$neovim_bin_path" >> "$SHELL_RC_FILE" || \
-{ print_color "red" "Failed to write into $SHELL_RC_FILE"; exit 5; }
+if [[ ":$PATH:" != *":$neovim_bin_path:"* ]]; then
+    echo "export PATH=\$PATH:$neovim_bin_path" >> "$SHELL_RC_FILE" || \
+    { print_color "red" "Failed to write into $SHELL_RC_FILE"; exit 5; }
+fi
 
 # Applying the changes on your shell
 source "$SHELL_RC_FILE" || { print_color "red" "Failed to reload $SHELL_RC_FILE"; exit 6; }
 
-print_color "green" "---------------- Neovim installed!!! ------------------"
+print_color "green" "---------------- Neovim installed ------------------"
 
 # Install AstroNvim
 print_color "orange" "---------------- Installing AstroNvim ------------------"
@@ -95,9 +97,11 @@ dir_exist "$dir_path"
 # Install AstroNvim plugins
 nvim || { print_color "red" "Something went wrong..."; exit 7; }
 
-# Add MYVIMRC path
+# Add MYVIMRC path if not already set
 MYVIMRC="$HOME/.config/nvim/init.lua"
-echo "export MYVIMRC=\"$MYVIMRC\"" >> "$SHELL_RC_FILE" || \
-{ print_color "red" "Failed to write into $SHELL_RC_FILE"; exit 8; }
+if ! grep -qF "export MYVIMRC=\"$MYVIMRC\"" "$SHELL_RC_FILE"; then
+    echo "export MYVIMRC=\"$MYVIMRC\"" >> "$SHELL_RC_FILE" || \
+    { print_color "red" "Failed to write into $SHELL_RC_FILE"; exit 8; }
+fi
 
-print_color "green" "---------------- AstroNvim installed!!! ------------------"
+print_color "green" "---------------- AstroNvim installed ------------------"
