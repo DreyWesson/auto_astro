@@ -87,9 +87,9 @@ fi
 update_progress 25
 
 # Execute commands and check for failure
-make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX=$HOME/neovim > /dev/null && \
-make -j4 > /dev/null && \
-make install > /dev/null || \
+make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX=$HOME/neovim > /dev/null 2>&1 && \
+make -j4 > /dev/null 2>&1 && \
+make install > /dev/null 2>&1 || \
 { print_color "red" "One of the commands failed"; exit 3; }
 update_progress 60
 
